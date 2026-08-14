@@ -1,0 +1,267 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Nitro Control</title>
+  <link rel="stylesheet" href="/src/styles.css" />
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+  <div class="app-container">
+    <!-- HEADER -->
+    <header class="navbar">
+      <div class="brand">
+        <div class="logo-icon">🔥</div>
+        <span class="brand-name">NITRO CONTROL</span>
+      </div>
+
+      <nav class="tabs">
+        <button class="tab-btn active" id="tab-monitoring">MONITORING</button>
+        <button class="tab-btn" id="tab-keyboard">KEYBOARD CONTROL</button>
+      </nav>
+
+      <div class="header-right">
+        <div class="status-badge sys-ok" id="sys-status">
+          <span class="dot"></span>
+          <span id="sys-status-text">SYS OK</span>
+        </div>
+        <div class="clock" id="system-clock">00:00:00</div>
+      </div>
+    </header>
+
+    <!-- VIEWPORT QUI MASQUE LE DÉBORDEMENT ET PERMET LE SLIDE -->
+    <main class="views-viewport">
+      <div class="pages-slider" id="pages-slider">
+        
+        <!-- PAGE 1: MONITORING -->
+        <section class="grid-container page-view" id="page-monitoring">
+          
+          <!-- CARD 1: FAN SPEED CONTROL -->
+          <div class="card">
+            <div class="card-header">
+              <h3>🌀 FAN SPEED CONTROL</h3>
+            </div>
+            <div class="card-body fans-display">
+              <!-- CPU FAN GAUGE -->
+              <div class="gauge-box">
+                <div class="svg-gauge">
+                  <svg width="120" height="120" viewBox="0 0 120 120">
+                    <circle class="gauge-bg" cx="60" cy="60" r="50" />
+                    <circle class="gauge-progress cpu-progress" id="cpu-progress" cx="60" cy="60" r="50" />
+                  </svg>
+                  <div class="gauge-inner">
+                    <span class="rpm-val" id="cpu-rpm-text">--</span>
+                    <span class="rpm-unit">RPM</span>
+                  </div>
+                </div>
+                <span class="gauge-label">CPU FAN</span>
+              </div>
+
+              <!-- GPU FAN GAUGE -->
+              <div class="gauge-box">
+                <div class="svg-gauge">
+                  <svg width="120" height="120" viewBox="0 0 120 120">
+                    <circle class="gauge-bg" cx="60" cy="60" r="50" />
+                    <circle class="gauge-progress gpu-progress" id="gpu-progress" cx="60" cy="60" r="50" />
+                  </svg>
+                  <div class="gauge-inner">
+                    <span class="rpm-val" id="gpu-rpm-text">--</span>
+                    <span class="rpm-unit">RPM</span>
+                  </div>
+                </div>
+                <span class="gauge-label">GPU FAN</span>
+              </div>
+            </div>
+          </div>
+          
+          <!-- CARD 2: THERMAL MONITORING -->
+          <div class="card">
+            <div class="card-header">
+              <h3>🌡️ THERMAL MONITORING</h3>
+              <div class="legend">
+                <span class="leg-item cpu"><span class="sq"></span> CPU <strong id="cpu-temp-text">--°C</strong></span>
+                <span class="leg-item gpu"><span class="sq"></span> GPU <strong id="gpu-temp-text">--°C</strong></span>
+              </div>
+            </div>
+            <div class="card-body chart-box">
+              <canvas id="thermalChart"></canvas>
+            </div>
+          </div>
+
+          <!-- CARD 3: POWER PLAN -->
+          <div class="card">
+            <div class="card-header">
+              <h3>⚡ POWER PLAN</h3>
+            </div>
+            <div class="card-body power-selector">
+              <button class="power-btn" id="power-quiet">
+                <span class="icon">🌙</span> Silencieux
+              </button>
+              <button class="power-btn active" id="power-default">
+                <span class="icon">📈</span> Équilibré
+              </button>
+              <button class="power-btn" id="power-perf">
+                <span class="icon">🔥</span> Performances
+              </button>
+            </div>
+          </div>
+
+          <!-- CARD 4: MANUAL TUNING -->
+          <div class="card">
+            <div class="card-header">
+              <h3>🎛️ MANUAL TUNING</h3>
+            </div>
+            <div class="card-body tuning-box">
+              <div class="mode-selector">
+                <button class="mode-btn active" id="mode-auto">Auto</button>
+                <button class="mode-btn" id="mode-max">Max</button>
+                <button class="mode-btn" id="mode-custom">Custom</button>
+              </div>
+
+              <div class="sliders-group">
+                <!-- CPU FAN OVERRIDE -->
+                <div class="slider-item">
+                  <div class="slider-info">
+                    <label class="toggle-item-mini">
+                      <input type="checkbox" id="toggle-cpu-custom" />
+                      <span class="slider-sw"></span>
+                      <span class="lbl">CPU Fan Override</span>
+                    </label>
+                    <span id="cpu-slider-val">75%</span>
+                  </div>
+                  <input type="range" id="cpu-fan-slider" min="0" max="100" value="75" />
+                </div>
+
+                <!-- GPU FAN OVERRIDE -->
+                <div class="slider-item">
+                  <div class="slider-info">
+                    <label class="toggle-item-mini">
+                      <input type="checkbox" id="toggle-gpu-custom" />
+                      <span class="slider-sw"></span>
+                      <span class="lbl">GPU Fan Override</span>
+                    </label>
+                    <span id="gpu-slider-val">60%</span>
+                  </div>
+                  <input type="range" id="gpu-fan-slider" min="0" max="100" value="60" />
+                </div>
+              </div>
+
+              <div class="toggles-row">
+                <label class="toggle-item">
+                  <input type="checkbox" id="toggle-winlock" checked />
+                  <span class="slider-sw"></span>
+                  <span class="lbl">WIN Block</span>
+                </label>
+                <label class="toggle-item">
+                  <input type="checkbox" id="toggle-overdrive" />
+                  <span class="slider-sw"></span>
+                  <span class="lbl">LCD Overdrive</span>
+                </label>
+                <label class="toggle-item">
+                  <input type="checkbox" id="toggle-battery" />
+                  <span class="slider-sw"></span>
+                  <span class="lbl">80% Limiter</span>
+                </label>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- PAGE 2: KEYBOARD CONTROL -->
+        <section class="keyboard-layout page-view" id="page-keyboard">
+          <!-- EFFETS RGB -->
+          <div class="card fx-card">
+            <div class="card-header">
+              <h3>✨ BACKLIGHT EFFECTS</h3>
+            </div>
+            <div class="card-body fx-list">
+              <button class="fx-item">Static</button>
+              <button class="fx-item">Breathing</button>
+              <button class="fx-item active">Wave</button>
+              <button class="fx-item">Spectrum</button>
+              <button class="fx-item">Reactive</button>
+              <button class="fx-item">Ripple</button>
+            </div>
+          </div>
+
+          <!-- COULEURS DE THÈME ET SLIDERS -->
+          <div class="card master-color-card">
+            <div class="card-header">
+              <h3>🎨 MASTER THEME COLOR</h3>
+            </div>
+            <div class="card-body theme-box">
+              <span class="sub-label">PRESET COLOR SPECTRUM</span>
+              <div class="color-palette">
+                <div class="color-swatch active" style="background: #ff2a38;" data-color="#ff2a38"></div>
+                <div class="color-swatch" style="background: #ff7b00;" data-color="#ff7b00"></div>
+                <div class="color-swatch" style="background: #ffd600;" data-color="#ffd600"></div>
+                <div class="color-swatch" style="background: #00d26a;" data-color="#00d26a"></div>
+                <div class="color-swatch" style="background: #00b0ff;" data-color="#00b0ff"></div>
+                <div class="color-swatch" style="background: #a855f7;" data-color="#a855f7"></div>
+                <div class="color-swatch" style="background: #ec4899;" data-color="#ec4899"></div>
+                <div class="color-swatch" style="background: #ffffff;" data-color="#ffffff"></div>
+              </div>
+
+              <div class="sliders-group">
+                <div class="slider-item">
+                  <div class="slider-info">
+                    <span>Vitesse (Speed)</span>
+                    <span id="rgb-speed-val">60%</span>
+                  </div>
+                  <input type="range" id="rgb-speed-slider" min="0" max="100" value="60" />
+                </div>
+
+                <div class="slider-item">
+                  <div class="slider-info">
+                    <span>Luminosité</span>
+                    <span id="rgb-brightness-val">80%</span>
+                  </div>
+                  <input type="range" id="rgb-brightness-slider" min="0" max="100" value="80" />
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- 4-ZONE CONFIGURATION -->
+          <div class="card zone-card">
+            <div class="card-header">
+              <h3>⌨️ 4-ZONE BACKLIGHT CONFIGURATION</h3>
+            </div>
+            <div class="card-body zone-box">
+              <div class="kb-preview">
+                <div class="zone-block z1" id="preview-z1"><span>ZONE 1</span></div>
+                <div class="zone-block z2" id="preview-z2"><span>ZONE 2</span></div>
+                <div class="zone-block z3" id="preview-z3"><span>ZONE 3</span></div>
+                <div class="zone-block z4" id="preview-z4"><span>ZONE 4</span></div>
+              </div>
+
+              <div class="zone-pickers">
+                <div class="picker-item">
+                  <span>Zone 1</span>
+                  <input type="color" id="picker-z1" value="#00b0ff" />
+                </div>
+                <div class="picker-item">
+                  <span>Zone 2</span>
+                  <input type="color" id="picker-z2" value="#00d26a" />
+                </div>
+                <div class="picker-item">
+                  <span>Zone 3</span>
+                  <input type="color" id="picker-z3" value="#ffd600" />
+                </div>
+                <div class="picker-item">
+                  <span>Zone 4</span>
+                  <input type="color" id="picker-z4" value="#a855f7" />
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+      </div>
+    </main>
+  </div>
+
+  <script type="module" src="/src/main.ts"></script>
+</body>
+</html>
